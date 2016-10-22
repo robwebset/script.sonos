@@ -388,120 +388,133 @@ if __name__ == '__main__':
     # Check for the list of things that impact audio
     audioChanges = Settings.linkAudioWithSonos() or Settings.switchSonosToLineIn() or Settings.switchSonosToLineInOnMediaStart()
 
-    # Check to see if we need to launch the Sonos Controller as soon as Kodi starts
-    if Settings.autoLaunchControllerOnStartup():
-        # Launch the Sonos controller, but do not block as we have more to do as a service
-        log("SonosService: Launching controller on startup")
-        xbmc.executebuiltin('RunScript(%s)' % (os.path.join(CWD, "default.py")), False)
+    json_query = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Addons.GetAddonDetails", "params": { "addonid": "repository.robwebset", "properties": ["enabled", "broken", "name", "author"]  }, "id": 1}')
+    json_response = simplejson.loads(json_query)
 
-    if (not Settings.isNotificationEnabled()) and (not audioChanges) and (not Settings.autoPauseSonos()) and (not Settings.redirectVolumeControls()):
-        log("SonosService: Notifications, Volume Link and Auto Pause are disabled, exiting service")
-    else:
-        sonosDevice = Sonos.createSonosDevice()
+    displayNotice = True
+    if ("result" in json_response) and ('addon' in json_response['result']):
+        addonItem = json_response['result']['addon']
+        if (addonItem['enabled'] is True) and (addonItem['broken'] is False) and (addonItem['type'] == 'xbmc.addon.repository') and (addonItem['addonid'] == 'repository.robwebset') and (addonItem['author'] == 'robwebset'):
+            displayNotice = False
 
-        # Make sure a Sonos speaker was found
-        if sonosDevice is not None:
-            timeUntilNextCheck = Settings.getNotificationCheckFrequency() * Settings.getChecksPerSecond()
+            # Check to see if we need to launch the Sonos Controller as soon as Kodi starts
+            if Settings.autoLaunchControllerOnStartup():
+                # Launch the Sonos controller, but do not block as we have more to do as a service
+                log("SonosService: Launching controller on startup")
+                xbmc.executebuiltin('RunScript(%s)' % (os.path.join(CWD, "default.py")), False)
 
-            log("SonosService: Notification Check Frequency = %d" % timeUntilNextCheck)
+            if (not Settings.isNotificationEnabled()) and (not audioChanges) and (not Settings.autoPauseSonos()) and (not Settings.redirectVolumeControls()):
+                log("SonosService: Notifications, Volume Link and Auto Pause are disabled, exiting service")
+            else:
+                sonosDevice = Sonos.createSonosDevice()
 
-            lastDisplayedTrack = None
-
-            # Need to only display the popup when the service starts if there is
-            # currently something playing
-            justStartedService = True
-
-            # Class to deal with sync of the volume
-            volumeLink = SonosVolumeLink(sonosDevice)
-
-            # Class to deal with redirecting the volume
-            redirectVolume = SonosVolumeRedirect(sonosDevice)
-
-            # Class that handles the automatic pausing of the Sonos system
-            autoPause = SonosAutoPause(sonosDevice)
-
-            # Loop until Kodi exits
-            while (not xbmc.abortRequested):
-                # Fist check to see if the Sonos needs to be switched
-                # to line-in because media has started playing
-                volumeLink.switchToLineInIfXmbcPlaying()
-
-                # Make sure the volume matches
-                volumeLink.updateSonosVolume()
-
-                # Check if a volume change has been made
-                redirectVolume.checkVolumeChange()
-
-                # Now check to see if the Sonos system needs pausing
-                autoPause.check()
-
-                if (timeUntilNextCheck < 1) and Settings.isNotificationEnabled():
-                    if Settings.stopNotifIfVideoPlaying() and xbmc.Player().isPlayingVideo():
-                        log("SonosService: Video Playing, Skipping Notification Display")
-                    elif Settings.stopNotifIfControllerShowing() and (xbmcgui.Window(10000).getProperty("SonosControllerShowing") == 'true'):
-                        log("SonosService: Sonos Controller Showing, Skipping Notification Display")
-                        # Reset the "just started" flag to ensure that when we exit it does not
-                        # show the notification immediately
-                        justStartedService = True
-                    else:
-                        log("SonosService: Notification wait time expired")
-
-                        try:
-                            # Get the current track that is being played at the moment
-                            track = sonosDevice.get_current_track_info()
-
-                            # Record if the sonos is currently playing
-                            isActive = True
-
-                            # Check to see if a new track is playing before displaying the popup
-                            if (track['uri'] == '') or (track['title'] == ''):
-                                track = None
-                                # Also make the last track value None as we don't want
-                                # this seen as a change
-                                lastDisplayedTrack = None
-                            elif justStartedService is True:
-                                # Check if the sonos is currently playing
-                                playStatus = sonosDevice.get_current_transport_info()
-                                if (playStatus is None) or (playStatus['current_transport_state'] != 'PLAYING'):
-                                    isActive = False
-
-                            # Check to see if the playing track has changed
-                            if (track is not None) and ((lastDisplayedTrack is None) or (track['uri'] != lastDisplayedTrack['uri'])):
-                                # Update the last displayed track to the current one
-                                lastDisplayedTrack = track
-                                # Only display the dialog if it is playing
-                                if isActive:
-                                    if Settings.useXbmcNotifDialog():
-                                        log("SonosService: Currently playing artist = %s, album = %s, track = %s" % (track['artist'], track['album'], track['title']))
-
-                                        # Get the album art if it is set (Default to the Sonos icon)
-                                        albumArt = ICON
-                                        if track['album_art'] != "":
-                                            albumArt = track['album_art']
-
-                                        # Gotham allows you to have a dialog without making a sound
-                                        xbmcgui.Dialog().notification(track['artist'], track['title'], albumArt, Settings.getNotificationDisplayDuration(), False)
-                                    else:
-                                        sonosPopup = SonosPlayingPopup.createSonosPlayingPopup(track)
-                                        sonosPopup.showPopup()
-                                        del sonosPopup
-                        except:
-                            # Connection failure - may just be a network glitch - so don't exit
-                            log("SonosService: Error from speaker %s" % Settings.getIPAddress())
-                            log("SonosService: %s" % traceback.format_exc())
-
-                        # No longer the first start
-                        justStartedService = False
-
-                    # Reset the timer for the next check
+                # Make sure a Sonos speaker was found
+                if sonosDevice is not None:
                     timeUntilNextCheck = Settings.getNotificationCheckFrequency() * Settings.getChecksPerSecond()
 
-                # Increment the timer and sleep for a second before the next check
-                xbmc.sleep(1000 / Settings.getChecksPerSecond())
-                timeUntilNextCheck = timeUntilNextCheck - 1
+                    log("SonosService: Notification Check Frequency = %d" % timeUntilNextCheck)
 
-            redirectVolume.cleanup()
-            del redirectVolume
-            del volumeLink
-            del autoPause
+                    lastDisplayedTrack = None
+
+                    # Need to only display the popup when the service starts if there is
+                    # currently something playing
+                    justStartedService = True
+
+                    # Class to deal with sync of the volume
+                    volumeLink = SonosVolumeLink(sonosDevice)
+
+                    # Class to deal with redirecting the volume
+                    redirectVolume = SonosVolumeRedirect(sonosDevice)
+
+                    # Class that handles the automatic pausing of the Sonos system
+                    autoPause = SonosAutoPause(sonosDevice)
+
+                    # Loop until Kodi exits
+                    while (not xbmc.abortRequested):
+                        # Fist check to see if the Sonos needs to be switched
+                        # to line-in because media has started playing
+                        volumeLink.switchToLineInIfXmbcPlaying()
+
+                        # Make sure the volume matches
+                        volumeLink.updateSonosVolume()
+
+                        # Check if a volume change has been made
+                        redirectVolume.checkVolumeChange()
+
+                        # Now check to see if the Sonos system needs pausing
+                        autoPause.check()
+
+                        if (timeUntilNextCheck < 1) and Settings.isNotificationEnabled():
+                            if Settings.stopNotifIfVideoPlaying() and xbmc.Player().isPlayingVideo():
+                                log("SonosService: Video Playing, Skipping Notification Display")
+                            elif Settings.stopNotifIfControllerShowing() and (xbmcgui.Window(10000).getProperty("SonosControllerShowing") == 'true'):
+                                log("SonosService: Sonos Controller Showing, Skipping Notification Display")
+                                # Reset the "just started" flag to ensure that when we exit it does not
+                                # show the notification immediately
+                                justStartedService = True
+                            else:
+                                log("SonosService: Notification wait time expired")
+
+                                try:
+                                    # Get the current track that is being played at the moment
+                                    track = sonosDevice.get_current_track_info()
+
+                                    # Record if the sonos is currently playing
+                                    isActive = True
+
+                                    # Check to see if a new track is playing before displaying the popup
+                                    if (track['uri'] == '') or (track['title'] == ''):
+                                        track = None
+                                        # Also make the last track value None as we don't want
+                                        # this seen as a change
+                                        lastDisplayedTrack = None
+                                    elif justStartedService is True:
+                                        # Check if the sonos is currently playing
+                                        playStatus = sonosDevice.get_current_transport_info()
+                                        if (playStatus is None) or (playStatus['current_transport_state'] != 'PLAYING'):
+                                            isActive = False
+
+                                    # Check to see if the playing track has changed
+                                    if (track is not None) and ((lastDisplayedTrack is None) or (track['uri'] != lastDisplayedTrack['uri'])):
+                                        # Update the last displayed track to the current one
+                                        lastDisplayedTrack = track
+                                        # Only display the dialog if it is playing
+                                        if isActive:
+                                            if Settings.useXbmcNotifDialog():
+                                                log("SonosService: Currently playing artist = %s, album = %s, track = %s" % (track['artist'], track['album'], track['title']))
+
+                                                # Get the album art if it is set (Default to the Sonos icon)
+                                                albumArt = ICON
+                                                if track['album_art'] != "":
+                                                    albumArt = track['album_art']
+
+                                                # Gotham allows you to have a dialog without making a sound
+                                                xbmcgui.Dialog().notification(track['artist'], track['title'], albumArt, Settings.getNotificationDisplayDuration(), False)
+                                            else:
+                                                sonosPopup = SonosPlayingPopup.createSonosPlayingPopup(track)
+                                                sonosPopup.showPopup()
+                                                del sonosPopup
+                                except:
+                                    # Connection failure - may just be a network glitch - so don't exit
+                                    log("SonosService: Error from speaker %s" % Settings.getIPAddress())
+                                    log("SonosService: %s" % traceback.format_exc())
+
+                                # No longer the first start
+                                justStartedService = False
+
+                            # Reset the timer for the next check
+                            timeUntilNextCheck = Settings.getNotificationCheckFrequency() * Settings.getChecksPerSecond()
+
+                        # Increment the timer and sleep for a second before the next check
+                        xbmc.sleep(1000 / Settings.getChecksPerSecond())
+                        timeUntilNextCheck = timeUntilNextCheck - 1
+
+                    redirectVolume.cleanup()
+                    del redirectVolume
+                    del volumeLink
+                    del autoPause
+
+    if displayNotice:
+        xbmc.executebuiltin('Notification("robwebset Repository Required","github.com/robwebset/repository.robwebset",10000,%s)' % ADDON.getAddonInfo('icon'))
+
     log("Sonos: Stopping service")
