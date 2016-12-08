@@ -15,7 +15,7 @@ import requests
 
 from . import config
 from .compat import (
-    Queue, SimpleHTTPRequestHandler, URLError, socketserver, urlopen
+    Queue, BaseHTTPRequestHandler, URLError, socketserver, urlopen
 )
 from .data_structures import from_didl_string
 from .exceptions import SoCoException
@@ -207,7 +207,7 @@ class EventServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     allow_reuse_address = True
 
 
-class EventNotifyHandler(SimpleHTTPRequestHandler):
+class EventNotifyHandler(BaseHTTPRequestHandler):
     """Handles HTTP ``NOTIFY`` Verbs sent to the listener server."""
 
     def do_NOTIFY(self):  # pylint: disable=invalid-name
@@ -227,23 +227,27 @@ class EventNotifyHandler(SimpleHTTPRequestHandler):
         # find the relevant service from the sid
         with _sid_to_service_lock:
             service = _sid_to_service.get(sid)
-        log.info(
-            "Event %s received for %s service on thread %s at %s", seq,
-            service.service_id, threading.current_thread(), timestamp)
-        log.debug("Event content: %s", content)
-        variables = parse_event_xml(content)
-        # Build the Event object
-        event = Event(sid, seq, service, timestamp, variables)
-        # pass the event details on to the service so it can update its cache.
-        if service is not None:  # It might have been removed by another thread
+        # It might have been removed by another thread
+        if service:
+            log.info(
+                "Event %s received for %s service on thread %s at %s", seq,
+                service.service_id, threading.current_thread(), timestamp)
+            log.debug("Event content: %s", content)
+            variables = parse_event_xml(content)
+            # Build the Event object
+            event = Event(sid, seq, service, timestamp, variables)
+            # pass the event details on to the service so it can update its
+            # cache.
             # pylint: disable=protected-access
             service._update_cache_on_event(event)
-        # Find the right queue, and put the event on it
-        with _sid_to_event_queue_lock:
-            try:
-                _sid_to_event_queue[sid].put(event)
-            except KeyError:  # The key have been deleted in another thread
-                pass
+            # Find the right queue, and put the event on it
+            with _sid_to_event_queue_lock:
+                try:
+                    _sid_to_event_queue[sid].put(event)
+                except KeyError:  # The key have been deleted in another thread
+                    pass
+        else:
+            log.info("No service registered for %s", sid)
         self.send_response(200)
         self.end_headers()
 
@@ -293,6 +297,7 @@ class EventListener(object):
         super(EventListener, self).__init__()
         #: `bool`: Indicates whether the server is currently running
         self.is_running = False
+        self._start_lock = threading.Lock()
         self._listener_thread = None
         #: `tuple`: The address (ip, port) on which the server is
         #: configured to listen.
@@ -317,18 +322,27 @@ class EventListener(object):
 
         # Find our local network IP address which is accessible to the
         # Sonos net, see http://stackoverflow.com/q/166506
+        with self._start_lock:
+            if not self.is_running:
+                # Use configured IP address if there is one, else detect
+                # automatically.
+                if config.EVENT_LISTENER_IP:
+                    ip_address = config.EVENT_LISTENER_IP
+                else:
+                    temp_sock = socket.socket(socket.AF_INET,
+                                              socket.SOCK_DGRAM)
+                    temp_sock.connect((any_zone.ip_address,
+                                       config.EVENT_LISTENER_PORT))
+                    ip_address = temp_sock.getsockname()[0]
+                    temp_sock.close()
 
-        temp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        temp_sock.connect((any_zone.ip_address, config.EVENT_LISTENER_PORT))
-        ip_address = temp_sock.getsockname()[0]
-        temp_sock.close()
-        # Start the event listener server in a separate thread.
-        self.address = (ip_address, config.EVENT_LISTENER_PORT)
-        self._listener_thread = EventServerThread(self.address)
-        self._listener_thread.daemon = True
-        self._listener_thread.start()
-        self.is_running = True
-        log.info("Event listener started")
+                # Start the event listener server in a separate thread.
+                self.address = (ip_address, config.EVENT_LISTENER_PORT)
+                self._listener_thread = EventServerThread(self.address)
+                self._listener_thread.daemon = True
+                self._listener_thread.start()
+                self.is_running = True
+                log.info("Event listener started")
 
     def stop(self):
         """Stop the event listener."""

@@ -11,6 +11,8 @@ import logging
 import re
 import socket
 from functools import wraps
+import warnings
+from .exceptions import SoCoUPnPException
 
 
 import requests
@@ -448,18 +450,21 @@ class SoCo(_SocoSingletonBase):
         created. This is often the case if you have a custom stream, it will
         need at least the title in the metadata in order to play.
 
-        Arguments:
-        uri -- URI of a stream to be played.
-        meta -- The track metadata to show in the player, DIDL format.
-        title -- The track title to show in the player
-        start -- If the URI that has been set should start playing
+        .. note:: A change in Sonos® (as of at least version 6.4.2) means that
+           the devices no longer accepts ordinary "http://" and "https://"
+           URIs. This method automatically replaces these prefixes with the
+           one that Sonos® expects: "x-rincon-mp3radio://".
 
-        Returns:
-        True if the Sonos speaker successfully started playing the track.
-        False if the track did not start (this may be because it was not
-        requested to start because "start=False")
+        Args:
+            uri (str): URI of the stream to be played.
+            meta (str): The track metadata to show in the player, DIDL format.
+            title (str): The track title to show in the player
+            start (bool): If the URI that has been set should start playing
+            convert_internet_uris (bool): FIXME
 
-        Raises SoCoException (or a subclass) upon errors.
+        Raises:
+            SoCoException: (or a subclass) upon errors.
+
         """
         if meta == '' and title != '':
             meta_template = '<DIDL-Lite xmlns:dc="http://purl.org/dc/elements'\
@@ -474,6 +479,11 @@ class SoCo(_SocoSingletonBase):
             tunein_service = 'SA_RINCON65031_'
             # Radio stations need to have at least a title to play
             meta = meta_template.format(title=title, service=tunein_service)
+
+        for prefix in ('http://', 'https://'):
+            if uri.startswith(prefix):
+                # Replace only the first instance
+                uri = uri.replace(prefix, 'x-rincon-mp3radio://', 1)
 
         self.avTransport.SetAVTransportURI([
             ('InstanceID', 0),
@@ -1325,7 +1335,9 @@ class SoCo(_SocoSingletonBase):
         requested (`max_items`), if it is, use `start` to page through and
         get the entire list of favorites.
         """
-
+        message = 'The output type of this method will probably change in '\
+                  'the future to use SoCo data structures'
+        warnings.warn(message, stacklevel=2)
         return self.__get_favorites(RADIO_SHOWS, start, max_items)
 
     def get_favorite_radio_stations(self, start=0, max_items=100):
@@ -1341,6 +1353,9 @@ class SoCo(_SocoSingletonBase):
         requested (`max_items`), if it is, use `start` to page through and
         get the entire list of favorites.
         """
+        message = 'The output type of this method will probably change in '\
+                  'the future to use SoCo data structures'
+        warnings.warn(message, stacklevel=2)
         return self.__get_favorites(RADIO_STATIONS, start, max_items)
 
     def get_sonos_favorites(self, start=0, max_items=100):
@@ -1356,6 +1371,9 @@ class SoCo(_SocoSingletonBase):
         requested (`max_items`), if it is, use `start` to page through and
         get the entire list of favorites.
         """
+        message = 'The output type of this method will probably change in '\
+                  'the future to use SoCo data structures'
+        warnings.warn(message, stacklevel=2)
         return self.__get_favorites(SONOS_FAVORITES, start, max_items)
 
     def __get_favorites(self, favorite_type, start=0, max_items=100):
@@ -1526,40 +1544,48 @@ class SoCo(_SocoSingletonBase):
         """Sets the sleep timer.
 
         Args:
-            sleep_time_seconds (`int`): How long to wait before turning off
-                speaker in seconds. Maximum value of 86399
+            sleep_time_seconds (int or NoneType): How long to wait before
+                turning off speaker in seconds, None to cancel a sleep timer.
+                Maximum value of 86399
 
-        Returns:
-            bool: True if succesful, False otherwise
-
-        Raises SoCoException (or a subclass) upon errors, ValueError for
-            incorrect syntax.
+        Raises:
+            SoCoException: Upon errors interacting with Sonos controller
+            ValueError: Argument/Syntax errors
 
         """
-        if sleep_time_seconds and \
-           sleep_time_seconds != int(sleep_time_seconds):
+        # Note: A value of None for sleep_time_seconds is valid, and needs to
+        # be preserved distinctly separate from 0. 0 means go to sleep now,
+        # which will immediately start the sound tappering, and could be a
+        # useful feature, while None means cancel the current timer
+        try:
+            if sleep_time_seconds is None:
+                sleep_time = ''
+            else:
+                sleep_time = format(
+                    datetime.timedelta(seconds=int(sleep_time_seconds))
+                )
+            self.avTransport.ConfigureSleepTimer([
+                ('InstanceID', 0),
+                ('NewSleepTimerDuration', sleep_time),
+            ])
+        except SoCoUPnPException as err:
+            if 'Error 402 received' in str(err):
+                raise ValueError('invalid sleep_time_seconds, must be integer \
+                    value between 0 and 86399 inclusive or None')
+            else:
+                raise
+        except ValueError:
             raise ValueError('invalid sleep_time_seconds, must be integer \
-                value between 0 and 86399 inclusive')
-        if sleep_time_seconds:
-            # pylint: disable = redefined-variable-type
-            sleep_times = datetime.timedelta(seconds=int(sleep_time_seconds))
-            sleep_times = str(sleep_times).split(':')
-            sleep_times = tuple([int(i) for i in sleep_times])
-            sleep_time = "%02d:%02d:%02d" % sleep_times
-        else:
-            sleep_time = ''
-
-        return self.avTransport.ConfigureSleepTimer([
-            ('InstanceID', 0),
-            ('NewSleepTimerDuration', sleep_time),
-        ])
+                value between 0 and 86399 inclusive or None')
 
     @only_on_master
     def get_sleep_timer(self):
         """Retrieves remaining sleep time, if any
 
         Returns:
-            int: Number of seconds left in timer
+            int or NoneType: Number of seconds left in timer. If there is no
+                sleep timer currently set it will return None.
+
         Raises SoCoException (or a subclass) upon errors.
 
         """
@@ -1568,10 +1594,11 @@ class SoCo(_SocoSingletonBase):
         ])
         if resp['RemainingSleepTimerDuration']:
             times = resp['RemainingSleepTimerDuration'].split(':')
-            resp['RemainingSleepTimerDuration'] = (int(times[0]) * 3600 +
-                                                   int(times[1]) * 60 +
-                                                   int(times[2]))
-        return resp['RemainingSleepTimerDuration']
+            return (int(times[0]) * 3600 +
+                    int(times[1]) * 60 +
+                    int(times[2]))
+        else:
+            return None
 
     # Deprecated methods - moved to music_library.py
     # pylint: disable=missing-docstring, too-many-arguments

@@ -1,3 +1,6 @@
+v100.1.0 (2016-12-08)
+- Support screenshots and latest SoCo
+
 v2.0.4 (2016-09-03)
 - Fix issue where coordinator incorrectly detected as slave
 
