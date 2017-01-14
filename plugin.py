@@ -898,7 +898,7 @@ if __name__ == '__main__':
     args = urlparse.parse_qs(sys.argv[2][1:])
 
     # Record what the plugin deals with, audio in our case
-    xbmcplugin.setContent(addon_handle, 'audio')
+    xbmcplugin.setContent(addon_handle, 'files')
 
     # Get the current mode from the arguments, if none set, then use None
     mode = args.get('mode', None)
