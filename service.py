@@ -398,7 +398,7 @@ if __name__ == '__main__':
             displayNotice = False
 
     if displayNotice:
-        xbmc.executebuiltin('Notification("robwebset or URepo Repository Required","github.com/robwebset/repository.robwebset",10000,%s)' % ADDON.getAddonInfo('icon'))
+        xbmc.executebuiltin('Notification("URepo Repository Required","www.urepo.org",10000,%s)' % ADDON.getAddonInfo('icon'))
     else:
         # Check to see if we need to launch the Sonos Controller as soon as Kodi starts
         if Settings.autoLaunchControllerOnStartup():

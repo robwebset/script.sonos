@@ -16,8 +16,6 @@
 		<summary lang="de">Sonos Controller</summary>
 		<summary lang="el">Χειριστήριο Sonos</summary>
 		<summary lang="en">Sonos Controller</summary>
-		<summary lang="en_NZ">Sonos Controller</summary>
-		<summary lang="en_US">Sonos Controller</summary>
 		<summary lang="es">Controlador Sonos</summary>
 		<summary lang="fr">Contrôleur Sonos</summary>
 		<summary lang="fr_CA">Contrôleur Sonos</summary>
@@ -35,8 +33,6 @@
 		<description lang="de">Unterstützt einfache Sonos-Befehle und Benachrichtigungen aus Kodi heraus. Mehr Details finden sich im Wiki.</description>
 		<description lang="el">Υποστηρίζεται απλός χειρισμός Sonos, και ειδοποιήσεις από το Kodi. Ελέγξτε την ιστοσελίδα του wiki για περισσότερες πληροφορίες.</description>
 		<description lang="en">Supports simple Sonos Controls and notifications from Kodi. Look at the wiki for more details.</description>
-		<description lang="en_NZ">Supports simple Sonos Controls and notifications from Kodi. Look at the wiki for more details.</description>
-		<description lang="en_US">Supports simple Sonos Controls and notifications from Kodi. Look at the wiki for more details.</description>
 		<description lang="es">Soporta controles simples de Sonos y avisos de Kodi. Mirar Wiki para más detalles.</description>
 		<description lang="fr">Gère le contrôle simple de Sonos et les notifications à partie de Kodi. Voir le Wiki pour plus de détails.</description>
 		<description lang="fr_CA">Prend en charge des contrôles simples et des notifications Sonos depuis Kodi. Consulter le wiki pour plus de détails.</description>
@@ -55,7 +51,7 @@
 		<license>See LICENSE.txt</license>
 		<forum>http://www.urepo.org/forum/viewtopic.php?t=1751</forum>
 		<source>https://github.com/robwebset/script.sonos</source>
-		<news>Available from the URepo repositories</news>
+		<news>Available from the URepo repository</news>
 		<donate>B6N5B293FUBP4</donate>
 		<assets>
 			<icon>icon.png</icon>
