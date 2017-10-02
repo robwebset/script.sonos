@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=not-context-manager
+
+# NOTE: The pylint not-content-manager warning is disabled pending the fix of
+# a bug in pylint: https://github.com/PyCQA/pylint/issues/782
 
 """Classes to handle Sonos UPnP Events and Subscriptions."""
 
@@ -17,7 +21,7 @@ from . import config
 from .compat import (
     Queue, BaseHTTPRequestHandler, URLError, socketserver, urlopen
 )
-from .data_structures import from_didl_string
+from .data_structures_entry import from_didl_string
 from .exceptions import SoCoException
 from .utils import camel_to_underscore
 from .xml import XML
@@ -87,7 +91,7 @@ def parse_event_xml(xml_event):
     # uses this namespace
     properties = tree.findall(
         '{urn:schemas-upnp-org:event-1-0}property')
-    for prop in properties:
+    for prop in properties:  # pylint: disable=too-many-nested-blocks
         for variable in prop:
             # Special handling for a LastChange event specially. For details on
             # LastChange events, see
@@ -251,7 +255,7 @@ class EventNotifyHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
 
-    def log_message(self, fmt, *args):
+    def log_message(self, fmt, *args):  # pylint: disable=arguments-differ
         # Divert standard webserver logging to the debug log
         log.debug(fmt, *args)
 
@@ -614,6 +618,7 @@ class Subscription(object):
         else:
             time_left = self.timeout - (time.time() - self._timestamp)
             return time_left if time_left > 0 else 0
+
 
 # pylint: disable=C0103
 event_listener = EventListener()

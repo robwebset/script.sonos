@@ -8,6 +8,7 @@
 # https://github.com/SoCo/SoCo/issues/98
 #
 
+
 import logging
 
 from .compat import NullHandler
@@ -17,17 +18,15 @@ from .exceptions import SoCoException, UnknownSoCoException
 
 # Will be parsed by setup.py to determine package metadata
 __author__ = 'The SoCo-Team <python-soco@googlegroups.com>'
-__version__ = '0.12.1'
+__version__ = '0.12.2'
 __website__ = 'https://github.com/SoCo/SoCo'
 __license__ = 'MIT License'
 
 #####################################
-# Actual version: 3rd August 2016 (9bb5f0c3461e877d4252fd0009fd7e972ded0781)
+# Actual version: 20th April2017 (06a5e758f65dcb920f72b21353094b468173fa77)
 #####################################
 # Also added fixes for:
 # #409 Event bugfixes.
-# #383 Added support for getting Sonos Favorites. Fixed some bugs with getting Radio Shows
-# #413 Add sleep timer
 
 
 # You really should not `import *` - it is poor practice

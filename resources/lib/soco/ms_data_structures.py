@@ -33,7 +33,7 @@ def tags_with_text(xml, tags=None):
     for element in xml:
         if element.text is not None:
             tags.append(element)
-        elif len(element) > 0:
+        elif len(element) > 0:  # pylint: disable=len-as-condition
             tags_with_text(element, tags)
         else:
             message = 'Unknown XML structure: {0}'.format(element)
@@ -541,6 +541,7 @@ class MSCollection(MusicServiceItem):
                    'extended_id': extended_id, 'service_id': service_id}
         content.update(kwargs)
         super(MSCollection, self).__init__(**content)
+
 
 MS_TYPE_TO_CLASS = {'artist': MSArtist, 'album': MSAlbum, 'track': MSTrack,
                     'albumList': MSAlbumList, 'favorites': MSFavorites,

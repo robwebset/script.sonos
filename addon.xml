@@ -4,6 +4,7 @@
 		<import addon="xbmc.python" version="2.19.0"/>
 		<import addon="script.module.requests" version="2.3.0"/>
 		<import addon="script.module.simplejson" version="3.3.0"/>
+		<import addon="script.module.xmltodict" version="0.9.0"/>
 		<import addon="script.artistslideshow" version="2.0.1"/>
 		<import addon="script.cu.lrclyrics" version="3.2.3"/>
 	</requires>

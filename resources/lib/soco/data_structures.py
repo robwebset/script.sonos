@@ -70,43 +70,6 @@ def to_didl_string(*args):
         return XML.tostring(didl, encoding='unicode')
 
 
-def from_didl_string(string):
-    """Convert a unicode xml string to a list of `DIDLObjects <DidlObject>`.
-
-    Args:
-        string (str): A unicode string containing an XML representation of one
-            or more DIDL-Lite items (in the form  ``'<DIDL-Lite ...>
-            ...</DIDL-Lite>'``)
-
-    Returns:
-        list: A list of one or more instances of `DidlObject` or a subclass
-    """
-    items = []
-    root = XML.fromstring(string.encode('utf-8'))
-    for elt in root:
-        if elt.tag.endswith('item') or elt.tag.endswith('container'):
-            item_class = elt.findtext(ns_tag('upnp', 'class'))
-
-            # In case this class has an # specified unofficial
-            # subclass, ignore it by stripping it from item_class
-            if '.#' in item_class:
-                item_class = item_class[:item_class.find('.#')]
-
-            try:
-                cls = _DIDL_CLASS_TO_CLASS[item_class]
-            except KeyError:
-                raise DIDLMetadataError("Unknown UPnP class: %s" % item_class)
-            items.append(cls.from_element(elt))
-        else:
-            # <desc> elements are allowed as an immediate child of <DIDL-Lite>
-            # according to the spec, but I have not seen one there in Sonos, so
-            # we treat them as illegal. May need to fix this if this
-            # causes problems.
-            raise DIDLMetadataError("Illegal child of DIDL element: <%s>"
-                                    % elt.tag)
-    return items
-
-
 ###############################################################################
 # DIDL RESOURCE                                                               #
 ###############################################################################
@@ -510,6 +473,7 @@ class DidlObject(with_metaclass(DidlMetaClass, object)):
         if title_elt is None:
             raise DIDLMetadataError(
                 "Missing title element")
+        title = really_unicode(title_elt.text)
 
         # Start: #409 Event bugfixes.
         if title_elt.text:
@@ -695,6 +659,42 @@ class DidlObject(with_metaclass(DidlMetaClass, object)):
         desc_elt.text = self.desc
 
         return elt
+
+    def get_uri(self, resource_nr=0):
+        """Return the uri to use for playing this item.
+
+        Args:
+            resource_nr (int): The index of the resource. Note that there is no
+                known object with more than one resource, so you can probably
+                keep the default value (0).
+        Returns:
+            str: The uri.
+        """
+        return self.resources[resource_nr].uri
+
+    def set_uri(self, uri, resource_nr=0, protocol_info=None):
+        """Set a resource uri for this instance. If no resource exists, create
+        a new one with the given protocol info.
+
+        Args:
+            uri (str): The resource uri.
+            resource_nr (int): The index of the resource on which to set the
+                uri. If it does not exist, a new resource is added to the list.
+                Note that by default, only the uri of the first resource is
+                used for playing the item.
+            protocol_info (str): Protocol info for the resource. If none is
+                given and the resource does not exist yet, a default protocol
+                info is constructed as '[uri prefix]:*:*:*'.
+        """
+        try:
+            self.resources[resource_nr].uri = uri
+            if protocol_info is not None:
+                self.resources[resource_nr].protocol_info = protocol_info
+        except IndexError:
+            if protocol_info is None:
+                # create default protcol info
+                protocol_info = uri[:uri.index(':')] + ':*:*:*'
+            self.resources.append(DidlResource(uri, protocol_info))
 
 
 ###############################################################################
@@ -1055,7 +1055,19 @@ class DidlMusicGenre(DidlGenre):
 
 class ListOfMusicInfoItems(list):
 
-    """Abstract container class for a list of music information items."""
+    """Abstract container class for a list of music information items.
+
+    Instances of this class are returned from queries into the music library
+    or to music services. The attributes :attr:`~total_matches` and
+    :attr:`~number_returned` are used to ascertain whether paging is required
+    in order to retrive all elements of the query. :attr:`~total_matches` is
+    the total number of results to the query and :attr:`~number_returned` is
+    the number of results actually returned. If the two differ, paging is
+    required. Paging is typically performed with the ``start`` and
+    ``max_items`` arguments to the query method. See e.g. the
+    :meth:`~soco.music_library.MusicLibrary.get_music_library_information`
+    method for details.
+    """
 
     def __init__(self, items, number_returned, total_matches, update_id):
         super(ListOfMusicInfoItems, self).__init__(items)
@@ -1140,11 +1152,6 @@ class SearchResult(ListOfMusicInfoItems):
 class Queue(ListOfMusicInfoItems):
 
     """Container class that represents a queue."""
-
-    def __init__(self, items, number_returned, total_matches, update_id):
-        super(Queue, self).__init__(
-            items, number_returned, total_matches, update_id
-        )
 
     def __repr__(self):
         return '{0}(items={1})'.format(
