@@ -456,16 +456,16 @@ class DidlObject(with_metaclass(DidlMetaClass, object)):
 
         # parent_id, item_id  and restricted are stored as attibutes on the
         # element
-        item_id = really_unicode(element.get('id', None))
+        item_id = element.get('id', None)
         if item_id is None:
             raise DIDLMetadataError("Missing id attribute")
-        parent_id = really_unicode(element.get('parentID', None))
+        item_id = really_unicode(item_id)
+        parent_id = element.get('parentID', None)
         if parent_id is None:
             raise DIDLMetadataError("Missing parentID attribute")
+        parent_id = really_unicode(parent_id)
         restricted = element.get('restricted', None)
-        if restricted is None:
-            raise DIDLMetadataError("Missing restricted attribute")
-        restricted = True if restricted in [1, 'true', 'True'] else False
+        restricted = False if restricted in [0, 'false', 'False'] else True
 
         # There must be a title. According to spec, it should be the first
         # child, but Sonos does not abide by this
