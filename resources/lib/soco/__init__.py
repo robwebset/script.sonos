@@ -27,6 +27,7 @@ __license__ = 'MIT License'
 #####################################
 # Also added fixes for:
 # #409 Event bugfixes.
+# #467 Handle none values properly and fix avTransport events
 
 
 # You really should not `import *` - it is poor practice
