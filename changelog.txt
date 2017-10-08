@@ -1,4 +1,4 @@
-v100.1.2 (2017-10-08)
+v100.2.0 (2017-10-08)
 - Support configuration of image change interval
 - Update to latest SoCo
 
