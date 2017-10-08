@@ -204,7 +204,11 @@ msgctxt "#32045"
 msgid "Status Checks Per Second (Restart Required)"
 msgstr ""
 
-#empty strings from id 32046 to 32058
+msgctxt "#32046"
+msgid "Image Change Frequency (Seconds)"
+msgstr ""
+
+#empty strings from id 32047 to 32058
 
 msgctxt "#32059"
 msgid "It is recommended that theaudiodb.com settings in ArtistSlideshow are enabled"

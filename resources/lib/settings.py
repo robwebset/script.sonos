@@ -153,6 +153,11 @@ class Settings():
         return ADDON.getSetting("hideSonosLogo") == 'true'
 
     @staticmethod
+    def getImageChangeFrequency():
+        # How long to display an image in the Artist Slideshow
+        return int(float(ADDON.getSetting("imageChangeFrequency")))
+
+    @staticmethod
     def linkAudioWithSonos():
         return ADDON.getSetting("linkAudioWithSonos") == 'true'
 
