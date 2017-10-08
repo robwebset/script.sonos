@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <window id="3002">
 	<defaultcontrol always="true">900</defaultcontrol>
-	<include>dialogeffect</include>
 	<coordinates>
 		<system>1</system>
 		<posx>0</posx>
@@ -26,6 +25,7 @@
 			<visible>system.getbool(input.enablemouse)</visible>
 		</control>
 
+		<!-- The following is a bit of a hack, but the only way to change the timeperimage value -->
 		<control type="multiimage">
 		    <posx>0</posx>
 		    <posy>0</posy>
@@ -36,6 +36,67 @@
 		    <timeperimage>5000</timeperimage>
 		    <fadetime>1000</fadetime>
 		    <randomize>true</randomize>
+			<visible>StringCompare(Window.Property(SonosImageChangeFrequency),5)</visible>
+		</control>
+		<control type="multiimage">
+		    <posx>0</posx>
+		    <posy>0</posy>
+		    <width>1280</width>
+		    <height>720</height>
+		    <imagepath background="true">$INFO[Window.Property(ArtistSlideshow)]</imagepath>
+			<aspectratio>keep</aspectratio>
+		    <timeperimage>10000</timeperimage>
+		    <fadetime>1000</fadetime>
+		    <randomize>true</randomize>
+			<visible>StringCompare(Window.Property(SonosImageChangeFrequency),10)</visible>
+		</control>
+		<control type="multiimage">
+		    <posx>0</posx>
+		    <posy>0</posy>
+		    <width>1280</width>
+		    <height>720</height>
+		    <imagepath background="true">$INFO[Window.Property(ArtistSlideshow)]</imagepath>
+			<aspectratio>keep</aspectratio>
+		    <timeperimage>15000</timeperimage>
+		    <fadetime>1000</fadetime>
+		    <randomize>true</randomize>
+			<visible>StringCompare(Window.Property(SonosImageChangeFrequency),15)</visible>
+		</control>
+		<control type="multiimage">
+		    <posx>0</posx>
+		    <posy>0</posy>
+		    <width>1280</width>
+		    <height>720</height>
+		    <imagepath background="true">$INFO[Window.Property(ArtistSlideshow)]</imagepath>
+			<aspectratio>keep</aspectratio>
+		    <timeperimage>20000</timeperimage>
+		    <fadetime>1000</fadetime>
+		    <randomize>true</randomize>
+			<visible>StringCompare(Window.Property(SonosImageChangeFrequency),20)</visible>
+		</control>
+		<control type="multiimage">
+		    <posx>0</posx>
+		    <posy>0</posy>
+		    <width>1280</width>
+		    <height>720</height>
+		    <imagepath background="true">$INFO[Window.Property(ArtistSlideshow)]</imagepath>
+			<aspectratio>keep</aspectratio>
+		    <timeperimage>25000</timeperimage>
+		    <fadetime>1000</fadetime>
+		    <randomize>true</randomize>
+			<visible>StringCompare(Window.Property(SonosImageChangeFrequency),25)</visible>
+		</control>
+		<control type="multiimage">
+		    <posx>0</posx>
+		    <posy>0</posy>
+		    <width>1280</width>
+		    <height>720</height>
+		    <imagepath background="true">$INFO[Window.Property(ArtistSlideshow)]</imagepath>
+			<aspectratio>keep</aspectratio>
+		    <timeperimage>30000</timeperimage>
+		    <fadetime>1000</fadetime>
+		    <randomize>true</randomize>
+			<visible>StringCompare(Window.Property(SonosImageChangeFrequency),30)</visible>
 		</control>
 
 		<control type="image">

@@ -646,6 +646,7 @@ class SonosArtistSlideshow(SonosControllerWindow):
         # Store the ID of this Window
         self.windowId = -1
         self.lyricListLinesCount = 0
+        self.athread = None
         SonosControllerWindow.__init__(self, *args, **kwargs)
 
     # Static method to create the Window Dialog class
@@ -708,6 +709,10 @@ class SonosArtistSlideshow(SonosControllerWindow):
         if not Settings.hideSonosLogo():
             xbmcgui.Window(self.windowId).setProperty('SonosAddonIcon', ICON)
 
+        # Set the interval that the main image should change
+        imgFreq = Settings.getImageChangeFrequency()
+        xbmcgui.Window(self.windowId).setProperty('SonosImageChangeFrequency', str(imgFreq))
+
         # Set option to make the artist slideshow full screen
         if Settings.fullScreenArtistSlideshow():
             xbmcgui.Window(self.windowId).setProperty('SonosAddonSlideshowFullscreen', "true")
@@ -737,10 +742,11 @@ class SonosArtistSlideshow(SonosControllerWindow):
             log("SonosArtistSlideshow: ArtistSlideShow did not stop")
 
         # Make sure the thread is dead at this point
-        try:
-            self.athread.join(3)
-        except:
-            log("Thread join error: %s" % traceback.format_exc(), xbmc.LOGERROR)
+        if self.athread not in [None, ""]:
+            try:
+                self.athread.join(3)
+            except:
+                log("Thread join error: %s" % traceback.format_exc(), xbmc.LOGERROR)
 
         # Now close the window (needs to be last as ArtistSlideshow is reading from it)
         SonosControllerWindow.close(self)
