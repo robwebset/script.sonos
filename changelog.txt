@@ -1,3 +1,6 @@
+v100.2.1 (2017-10-09)
+- Add Hebrew Translation
+
 v100.2.0 (2017-10-08)
 - Support configuration of image change interval
 - Update to latest SoCo
