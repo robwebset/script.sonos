@@ -605,8 +605,10 @@ class SonosControllerWindow(BaseWindow):  # xbmcgui.WindowXMLDialog
 
                 if (nextTrackList is not None) and (len(nextTrackList) > 0):
                     nextTrackItem = nextTrackList[0]
-                    nextTrackCreator = nextTrackItem.creator
-                    nextTrackTitle = nextTrackItem.title
+                    if hasattr(nextTrackItem, 'creator'):
+                        nextTrackCreator = nextTrackItem.creator
+                    if hasattr(nextTrackItem, 'title'):
+                        nextTrackTitle = nextTrackItem.title
             # If we have random play enabled, then we can not just read the next
             # track in the playlist, for this case we will need to see if there
             # is an event that tells us what the next track is
