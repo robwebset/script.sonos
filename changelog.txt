@@ -1,3 +1,6 @@
+v100.3.0 (2018-06-01)
+- Final Update
+
 v100.2.2 (2017-12-31)
 - New minimum Kodi Version is v17
 - Fix issue with possible next track not having a creator

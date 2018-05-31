@@ -1,0 +1,211 @@
+[[https://github.com/robwebset/script.sonos/raw/master/icon.png]]
+
+== Introduction ==
+You can install this addon from: [https://www.urepo.org URepo Repository]
+<br />
+<br />
+The Kodi Sonos addon allows you to control your Sonos system from Kodi. It is implemented (for those who like to know) as a script, plugin and service. In addition to controlling your Sonos system it also allows you to be notified (via a popup) whenever a new track starts and link the audio volume control of Kodi to the audio volume of the Sonos system. There is also a full "Artist View" controller that will display images and descriptions of the artists currently playing on the Sonos System.
+<br />
+<br />
+== Sonos Controller ==
+The Sonos Controller can be launched in two different ways:
+* From Programs -> Sonos
+* From the Browser Menu (See below)
+
+There are two different formats of controller. They both offer the same expected features:
+
+* Display Artist Name
+* Display Track Name
+* Display Album Name
+* Display Album Artwork
+* Display Track Duration and Current Position
+* Volume Display and Operations (Mute, Change Volume)
+* Control Operations (Play, Pause, Stop, Next, Previous, Seek)
+* Adjustment Operations (Loop, Random, Crossfade)
+
+The standard controller supports just this set of features, and the data is read from the source files that the Sonos system is playing or streaming.
+<center>[[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Controller-Default.JPG|200px]]</center>
+
+The advanced controllers will also support additional information which is retrieved from the internet. These are available when you enable the option "Display Artist Information" in the settings. These include:
+
+{|
+|-
+| [[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Controller-Artist-1.JPG|400px]]
+| Controller, Slideshow, Biography, Albums by the same artist
+|-
+| [[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Controller-Artist-2.JPG|400px]]
+| Controller, Slideshow
+|-
+| [[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Controller-Artist-3.JPG|400px]]
+| Slideshow Only (No Controller)
+''Note:'' This screen works well if you also have Notifications enabled (with "Do Not Display Notification If Controller Is Showing" unset) so that you also get notified what the artist and title of each track that starts is.
+|-
+| [[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Sonos-Controller-Artist-4.JPG|400px]]
+| Controller, Slideshow, Lyrics
+''Note:'' This screen will only show the lyrics when used with Helix (v14) or later (Kodi needs to be restarted after the initial install of the [http://kodi.wiki/view/Add-on:CU_LRC_Lyrics CU LRC Lyrics] addon)
+|}
+<br /><br />
+
+== Notifications ==
+The notifications option (if enabled) will display a small popup whenever the track being played by the Sonos system changes. This popup will display the Track Title, Artist and Album Artwork.
+{|
+|- align=center
+| [[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Notification-Sonos.JPG|200px]] || [[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Notification-XBMC.JPG|200px]]
+|- align=center
+| Sonos Notification Format || Kodi Notification Format
+|}
+<br />
+== Sonos Browser ==
+The Sonos Browser can be launched from "Music -> Add-ons -> Sonos", this will give the folowing options:
+<br />
+{| border="0"
+|- valign=top
+| [[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Browser-1.JPG|400px]]
+|
+* '''Launch Sonos Controller''' - Start the Sonos Controller
+* '''Music Library''' - List the locally stored tracks on your server
+* '''Radio Stations''' - List the radio stations saved in "My Radio Stations" 
+* '''Sonos Playlists''' - List your Sonos playlists
+* '''Queue''' - List the currently queued tracks to play on the Sonos system
+* '''Speech''' - Get your Sonos system to talk
+<br />
+|- valign=top
+| [[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Browser-2.JPG|400px]]
+|
+By right clicking on the Music Library to get the context menu, you will then have the option of "Update The Music Library" so that the current tracks are synchronised with the Sonos system.
+<br /><br />
+The Music Library section can be navigated to view and select tracks to play or add to the current queue. You can navigate directly down to a given track and select it.  This will cause that track to be played immediately on the Sonos System.
+<br />
+|- valign=top
+| [[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Browser-3.JPG|400px]]
+|
+If you were to right click to get the context menu on a track, album or artist you will get a menu that will enable you to
+* '''Play Now''' - Plays the given selection
+* '''Add To Queue''' - Adds the given selection to the end of the current queue
+* '''Replace Queue''' - Clears the current queue and adds the given selection to the queue
+<br />
+|- valign=top
+| [[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Browser-4.JPG|400px]]
+|
+If you were to right click to get the context menu when viewing the queue you will be able to
+* '''Play Track''' - Plays the given selection
+* '''Remove Track''' - Removes the given track from the current queue
+* '''Clear Queue''' - Removes all items from the queue
+<br />
+|- valign=top
+| [[https://github.com/robwebset/repository.robwebset/raw/master/script.sonos/images/Browser-5.JPG|400px]]
+|
+The Speech section will allow you to request that your Sonos system read out the messages you request.
+* '''Enter Speech Text To Play...''' - Specify some text to be spoken immediately
+* '''Enter Speech Text To Save...''' - Specify some text that can be saved and reused in future
+* After a space, the remainder of the screen will show any saved text in alphabetical order.
+When specifying text to be spoken there are some key words that will be substituted
+* '''%greet''' - A greeting based on the time of day (Good Morning, Good Afternoon, Good Evening)
+* '''%day''' - The current day (e.g. Monday, Tuesday ...)
+* '''%date''' - The current date (e.g. 3rd September)
+* '''%time''' - The current time (e.g. 19:14)
+You can delete any saved messages by calling up the context menu and selecting "Remove Saved Text"
+|}
+<br />
+<br />
+== Settings ==
+The Sonos addon does not require any other programs installed. It will communicate directly with your Sonos speaker to perform operations.
+<br /><br />
+The following settings are available:
+=== Speaker ===
+{| border="0"
+|- valign=top
+|
+:'''Search For Sonos Speakers...'''
+::Attempt to auto detect any Sonos speakers on the network
+:'''IP Address'''
+::The IP Address of your speaker
+:'''Zone Name (Optional)'''
+::The Zone Name which the Speaker belongs to (This will be auto populated if a search is done)
+:'''- Automatically Update IP Address On Startup'''
+::This will result in the Sonos Addon searching for Speakers in the given Zone, and setting their IP address automatically (Useful if the IP addresses of your speakers change and you want Kodi to auto-detect them each time the system starts)
+:<u>'''''Debugging'''''</u>
+::
+:'''Enable Debug logging'''
+::Enables Sonos debug logging into the Kodi log file
+|}
+
+=== Controller ===
+{| border="0"
+|- valign=top
+|
+:'''Display Artist Information'''
+::Displays images and artist information while items are playing when the controller is selected (using [http://kodi.wiki/view/Add-on:Artist_Slideshow ArtistSlideshow] and [http://kodi.wiki/view/Add-on:CU_LRC_Lyrics CU LRC Lyrics])
+:'''- Layout'''
+::A selection of various layouts of the screen when the Artist Information is shown
+:'''- Make Artist Slideshow Image Full Screen'''
+::When enabled will display the artist slideshow image full screen instead of in a frame
+:'''- Hide Sonos Logo'''
+::Stops the Sonos logo being displayed on the controller screen
+:'''Controller Refresh Interval (Seconds)'''
+::Sets how often the controller screen should refresh and check for changes of track being played
+:'''Avoid Duplicate Key Presses (Seconds)'''
+::When using a remote control and holding down a button (such as volume) it will send many requests to increase the volume - this setting allows you to ensure only one press is detected every X seconds. (This prevents flooding the Sonos system with requests).
+:'''Volume Change Increments'''
+::When the volume increase/decrease button, how much to change the volume by (default is 3%)
+|}
+
+=== Automation ===
+{| border="0"
+|- valign=top
+|
+:'''Link Kodi Volume With Sonos Speaker (Requires Restart)'''
+::Whenever you change the Kodi volume, the Sonos volume will be set to the same percentage value (Note: Changes in the Sonos Volume are not reflected in Kodi - this is one way only)
+:'''Redirect Volume Controls To Sonos (Requires Restart)'''
+::Change the default behaviour for Kodi volume and mute operations from the keyboard or remote control to send them to Sonos instead.
+:'''Switch Sonos To Line-In On Kodi Startup (Requires Restart)'''
+::When Kodi starts, it will send a message to the Sonos speaker to switch it to line-in
+:'''Switch Sonos To Line-In On Media Start (Requires Restart)'''
+::When Kodi starts playing any form of media, it will send a message to the Sonos speaker to switch it to line-in
+:'''Automatically Pause Sonos When Kodi Plays Media (Restart Required)'''
+::If you start playing any form of media in Kodi, then a pause command will be sent to the Sonos system to ensure it stops playing
+:'''- Automatically Resume Sonos (Seconds) [0 = Off]'''
+::If The Sonos Addon paused the Sonos system because of Kodi playing media, how many seconds to wait before resuming Sonos playback
+:'''Launch Controller On Kodi Startup'''
+::Will launch the Sonos Controller automatically when Kodi starts
+:'''Status Checks Per Second (Restart Required)'''
+::Will increase the number of times a  second the addon will check for status changes such as volume changes. Use this setting with care, as it will increase the processing power used on your machine.
+|}
+
+=== Plugin ===
+{| border="0"
+|- valign=top
+|
+:'''Batch Size'''
+::The number of records to retrieve from Sonos in one chunk, looping to get all the records in this batch size. (Default = 100)
+:'''Maximum Entries In Displayed Lists'''
+::Limits the number of entries that are retrieved from the Sonos system when generating lists (e.g. The Queue). (Default = 1000)
+:'''Use Skin Icons Instead Of Sonos Icons'''
+::Allows the change of the plugin section to use the default icons suplied by skin instead of the Sonos icons
+|}
+
+=== Notifications ===
+{| border="0"
+|- valign=top
+|
+:'''Enable Notifications (Restart Required)'''
+::Enables or disables the popup notification of track change
+:'''Display Notification For (Seconds)'''
+::How long to display the track information on the screen
+:'''Notification Check Frequency (Seconds)'''
+::The frequency in which the service check which track is playing on the Sonos speaker
+:'''Do Not Display Notification If Video Is Playing'''
+::Prevents the popup notification displaying while a video file is playing
+:'''Do Not Display Notification If Controller Is Showing'''
+::In most cases this would be "true" (default) so that the popup does not display the notification while the controller is showing.  However when using certain Artist Slideshow supported controller sceens, there is no display of the current artist name or track, this allos the notification to show while these screens are being used.
+:'''Use Default Kodi Notification Dialog'''
+::Uses the default Kodi popup dialog instead of the custom Sonos one
+<br />
+|}
+<br />
+== Debugging ==
+If reporting a problem, please also provide a debug log. To do this you need to enable BOTH:
+* Kodi logging from the main setting menu
+* Sonos debug from the Sonos addon settings menu
+Please do not paste the log into the forum thread, just link to it.
+<br />
