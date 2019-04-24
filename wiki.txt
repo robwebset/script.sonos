@@ -1,9 +1,6 @@
 [[https://github.com/robwebset/script.sonos/raw/master/icon.png]]
 
 == Introduction ==
-You can install this addon from: [https://www.urepo.org URepo Repository]
-<br />
-<br />
 The Kodi Sonos addon allows you to control your Sonos system from Kodi. It is implemented (for those who like to know) as a script, plugin and service. In addition to controlling your Sonos system it also allows you to be notified (via a popup) whenever a new track starts and link the audio volume control of Kodi to the audio volume of the Sonos system. There is also a full "Artist View" controller that will display images and descriptions of the artists currently playing on the Sonos System.
 <br />
 <br />
